@@ -11,7 +11,6 @@ load_dotenv()
 
 openai.api_key = os.environ["OPENAPI_KEY"]
 slack_key = os.environ["SLACK_BOT_TOKEN"]
-bot_user = os.environ["BOT_USER"]
 slack_signing_secret = os.environ["SLACK_SIGNING_SECRET"]
 chat_gpt_model = 'gpt-3.5-turbo-0301'
 max_tokens = 3200
