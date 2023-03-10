@@ -1,0 +1,2 @@
+{'ok': True, 'url': 'https://serialmarketers.slack.com/', 'team': 'Serial Marketers', 'user': 'chatgpt_channel_summa',
+'team_id': 'TBGE53ND7', 'user_id': 'U04LMJWDM7F', 'bot_id': 'B04LA1DTK8X', 'is_enterprise_install': False}

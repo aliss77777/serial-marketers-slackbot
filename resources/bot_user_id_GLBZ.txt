@@ -1,0 +1,2 @@
+{'ok': True, 'url': 'https://glib-zoomers.slack.com/', 'team': 'glib-zoomers', 'user': 'chatgptbot', 'team_id': 'T04QXC7M0RE', 'user_id': 'U04QXFF5W9W',
+'bot_id': 'B04QLDUB61X', 'is_enterprise_install': False}
