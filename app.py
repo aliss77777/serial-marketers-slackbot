@@ -89,8 +89,29 @@ def handle_message_events(body, say, logger):
 
 # handling bot app home views just for logging info
 @bolt_app.event("app_home_opened")
-def app_home_opened(body, logger):
-    logger.info(body)
+def update_home_tab(client, event, logger):
+    logger.info(event)
+    client.views_publish(
+        user_id=event['user'],
+        view={
+            "type":"home",
+            "callback_id":"home_view",
+            "blocks": [
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": '''*Welcome to the ChatGPT slack integration:tada: Go to the messages tab to interact.
+                            To use, open a direct message with the bot and do the following:
+                            1. To get a ChatGPT response, @mention the bot and write out your query.
+                            2. To do a channel summarization requestion, @mention the bot and the also #channel
+                                By default up to 7 days worth of messages will be retrieved.
+                                Make sure you add the bot to the channel first otherwise it won't work.  
+                                '''
+                    }
+                }],
+        }
+    )
 
 # summarizing mentions in a channel
 # @bolt_app.event("app_mention")
