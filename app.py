@@ -173,10 +173,10 @@ def get_summary_chatgpt(text_for_prompt):
     response = openai.ChatCompletion.create(
         model=chat_gpt_model,
         messages=[
-            {"role": "system", "content": '''You are a helpful assistant in Slack that provides a summary of 
-                                messages in the channel. Please include line breaks in long responses, thank you :)'''},
-            {"role": "user", "content": '''Please summarize the following messages with a rich level of detail 
-                                and several sentences of explanation: ''' + "###\n" + text_for_prompt},
+            {"role": "system", "content": '''You are a helpful assistant in Slack that provides content completion
+                                                        and content summarization upon user request.'''},
+            {"role": "user", "content": '''Please respond to the following messages with a rich level of detail 
+                                            and be as helpful and enthusiastic as possible: ''' + "###\n" + text_for_prompt},
         ]
     )
     print(response)
