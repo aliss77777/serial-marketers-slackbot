@@ -51,13 +51,14 @@ bolt_app = App(
 @bolt_app.event("message")
 def handle_message_events(body, say, logger):
     logger.info(body)
-    print(body)
+    #print(body)
     # handling DM's directed at the bot
     if body['event']['channel_type'] == 'im' and body['event']['text'] == 'hi':
          say('testing DM method')  # my user ID U04Q13P1GJJ
 
     # handling channel summary request
     elif body['event']['channel_type'] == 'im' and summarization_request_regex.match(body['event']['text']) != None:
+        completion_type = 'summarize'
         channel_id = channel_name_regex.findall(body['event']['text'])[0]
         say('Request received, please stand by')
         #say('channel ' + channel_id + ' summary goes here')  # my user ID U04Q13P1GJJ
@@ -76,14 +77,15 @@ def handle_message_events(body, say, logger):
         say(char_length)
         if len(text_for_prompt) > 12000:
             say('This is a big summary request. Please be patient :)')
-        say(completion_request_handler(text_for_prompt, max_tokens, encoding))
+        say(completion_request_handler(text_for_prompt, max_tokens, encoding, completion_type))
 
     # handling general completion prompt
     elif body['event']['channel_type'] == 'im' and completion_request_regex.match(body['event']['text']) != None:
+        completion_type = 'respond'
         text_for_completion_prompt = body['event']['text']
         text_for_completion_prompt = text_for_completion_prompt.replace(bot_user_id, '')
         say('One second, processing your request ')
-        say(completion_request_handler(text_for_completion_prompt, max_tokens, encoding))
+        say(completion_request_handler(text_for_completion_prompt, max_tokens, encoding, completion_type))
 
     return print(body)
 
@@ -160,29 +162,32 @@ def healthcheck():
 logger = logging.getLogger(__name__)
 
 
-def completion_request_handler(text_for_prompt, max_tokens, encoding):
+def completion_request_handler(text_for_prompt, max_tokens, encoding, completion_type):
+    completion_type = completion_type
     prompt_tokens = encoding.encode(text_for_prompt)
     if len(prompt_tokens) < max_tokens:
-        return get_summary_chatgpt(text_for_prompt)
+        return get_summary_chatgpt(text_for_prompt, completion_type)
     else:
         responses = []
-        return recursive_completion(prompt_tokens, max_tokens, encoding, responses)
+        return recursive_completion(prompt_tokens, max_tokens, encoding, responses, )
 
 
-def get_summary_chatgpt(text_for_prompt):
+def get_summary_chatgpt(text_for_prompt, completion_type):
+    completion_type = completion_type
     response = openai.ChatCompletion.create(
         model=chat_gpt_model,
         messages=[
             {"role": "system", "content": '''You are an assistant in Slack that provides content completion
                                                         and content summarization upon user request.'''},
-            {"role": "user", "content": '''Please respond to the following messages with a rich level of detail 
-                                            and be as helpful and enthusiastic as possible: ''' + "###\n" + text_for_prompt},
+            {"role": "user", "content": 'Please ' + completion_type + ''' the following messages with a rich level of detail 
+                                            and be as clear as possible: ''' + "###\n" + text_for_prompt},
         ]
     )
     print(response)
     return response.choices[0].message['content']
 
-def recursive_completion(prompt_tokens, max_tokens, encoding, responses):
+def recursive_completion(prompt_tokens, max_tokens, encoding, responses, completion_type):
+    completion_type = completion_type
     i = 0
     while len(prompt_tokens) > 0:
         print('prompt token length is ' + str(len(prompt_tokens)))
@@ -190,13 +195,13 @@ def recursive_completion(prompt_tokens, max_tokens, encoding, responses):
         chunk = encoding.decode(prompt_tokens[:min(max_tokens, len(prompt_tokens))])
         print('now on chunk number: ' + str(i))
         i += 1
-        responses.append(get_summary_chatgpt(chunk))
+        responses.append(get_summary_chatgpt(chunk, completion_type))
         # slices off the 'head' and continues through
         prompt_tokens = prompt_tokens[min(max_tokens, len(prompt_tokens)):len(prompt_tokens)]
         print('prompt token length is ' + str(len(prompt_tokens)))
         if len(prompt_tokens) < max_tokens:
             print('completing recursive function')
-            responses.append(get_summary_chatgpt(encoding.decode(prompt_tokens)))
+            responses.append(get_summary_chatgpt(encoding.decode(prompt_tokens), completion_type))
             prompt_tokens = prompt_tokens[len(prompt_tokens):len(prompt_tokens)]
             print('prompt token length is ' + str(len(prompt_tokens)))
             break
