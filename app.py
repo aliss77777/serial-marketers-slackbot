@@ -35,11 +35,11 @@ bot_user_id = client.auth_test()
 bot_user_id = bot_user_id['user_id']
 
 # creating regex pattern for channel mention in direct mentiod
-summarization_request_regex = re.compile('<@U\w{10}> <#C\w{10}|\w{1,}>') # e.g. 'C04T04MPAJV'
-#  'text': '<@U04QXFF5W9W> <#C04PT5L2ZSB|general>'
+summarization_request_regex = re.compile('<@U\w{10}> <#C\w{8}|\w{1,}>') # e.g. 'C04T04MPAJV'
+#  'text': '<@U04U6BU020K> <#CBH4YNBFF|lounge>'
 completion_request_regex = re.compile('<@U\w{10}> .*')
 # '<@U04QXFF5W9W> can you tell me'
-channel_name_regex = re.compile('C\w{10}') # e.g. 'C04T04MPAJV'
+channel_name_regex = re.compile('C\w{8}') # e.g. 'CBH4YNBFF'
 
 # using bolt as message responder per guidance from Slack on how to avoid duplicate messages
 # https://github.com/slackapi/python-slack-sdk/issues/1164
@@ -51,7 +51,7 @@ bolt_app = App(
 @bolt_app.event("message")
 def handle_message_events(body, say, logger):
     logger.info(body)
-    #print(body)
+    print(body)
     # handling DM's directed at the bot
     if body['event']['channel_type'] == 'im' and body['event']['text'] == 'hi':
          say('testing DM method')  # my user ID U04Q13P1GJJ
@@ -173,7 +173,7 @@ def get_summary_chatgpt(text_for_prompt):
     response = openai.ChatCompletion.create(
         model=chat_gpt_model,
         messages=[
-            {"role": "system", "content": '''You are a helpful assistant in Slack that provides content completion
+            {"role": "system", "content": '''You are an assistant in Slack that provides content completion
                                                         and content summarization upon user request.'''},
             {"role": "user", "content": '''Please respond to the following messages with a rich level of detail 
                                             and be as helpful and enthusiastic as possible: ''' + "###\n" + text_for_prompt},
